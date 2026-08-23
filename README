@@ -1,0 +1,176 @@
+# Agente de Traslados
+
+Sistema de registro inteligente de traslados por Telegram. Permite registrar movilizaciones de trabajo enviando un mensaje de texto natural al bot, y genera automáticamente la planilla mensual de transporte en Excel lista para entregar a la empresa.
+
+---
+
+## Problema que resuelve
+
+El registro manual de traslados requiere recordar todos los recorridos del mes, abrirlos en el calendario, transcribirlos al Excel uno por uno, y hacerlo todo a fin de mes cuando muchos ya se olvidaron.
+
+Este agente elimina ese proceso: en el momento que haces un traslado lo registras con un mensaje de texto en Telegram. A fin de mes escribes `/reporte MM AAAA` y recibes la planilla completa lista para entregar.
+
+```
+Antes: acumular recuerdos → buscar en el calendario → transcribir uno por uno → Excel
+Después: mensaje al bot en el momento → fin de mes la planilla llega por Telegram
+```
+
+---
+
+## Funcionalidades
+
+- **Registro por lenguaje natural** — escribe el traslado como lo dirías normalmente y GPT extrae origen, destino y proyecto automáticamente
+- **Fecha automática** — registra día, mes y año en el momento exacto del mensaje
+- **Valor fijo configurable** — el valor por traslado se configura en `.env` sin tocar el código
+- **Almacenamiento persistente** — base de datos SQLite que conserva los registros entre sesiones
+- **Generación de planilla mensual** — comando `/reporte MM AAAA` genera la planilla con el formato de la empresa
+- **Envío por Telegram** — la planilla llega directamente al celular
+
+---
+
+## Arquitectura
+
+```
+Mensaje de texto (Telegram)
+        ↓
+bot/telegram_bot.py — detecta traslado y maneja el flujo
+        ↓
+agente/extractor.py — GPT extrae descripción y proyecto
+        ↓
+database/operaciones.py — guarda en SQLite con fecha automática
+        ↓
+/reporte MM AAAA
+        ↓
+reportes/generador_excel.py — genera planilla con formato empresa
+        ↓
+Planilla por Telegram
+```
+
+---
+
+## Estructura del proyecto
+
+```
+AGENTE_TRASLADOS/
+│
+├── main.py                        ← punto de entrada
+│
+├── bot/
+│   └── telegram_bot.py            ← recibe mensajes y detecta traslados
+│
+├── agente/
+│   └── extractor.py               ← interpreta el texto con GPT
+│
+├── database/
+│   ├── modelos.py                 ← crea la base de datos
+│   └── operaciones.py             ← guarda y consulta registros
+│
+├── reportes/
+│   └── generador_excel.py         ← genera la planilla mensual
+│
+├── .env.example                   ← plantilla de configuración
+├── .gitignore
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Uso del bot
+
+### Registrar un traslado
+
+Escribe el traslado de forma natural comenzando con la palabra **traslado**:
+
+```
+traslado Punto A a Punto B, proyecto Casa Personal
+traslado Punto B a Punto C, proyecto Casa hermana
+```
+
+El bot confirma con:  Traslado Registrado
+
+### Generar la planilla mensual
+
+```
+/reporte 08 2026
+```
+
+El bot responde con el archivo Excel listo para entregar.
+
+---
+
+## Stack tecnológico
+
+| Herramienta | Uso |
+|---|---|
+| Python 3.12 | Lenguaje principal |
+| OpenAI API (GPT-4o) | Interpretación de texto en lenguaje natural |
+| python-telegram-bot | Interfaz de mensajería |
+| SQLite | Base de datos local persistente |
+| openpyxl | Generación de la planilla Excel |
+| python-dotenv | Gestión de variables de entorno |
+
+---
+
+## Instalación
+
+### Requisitos
+
+- Python 3.10+
+- Token de Telegram Bot (via [@BotFather](https://t.me/BotFather))
+- API Key de OpenAI
+- Planilla Excel de traslados con el formato de tu empresa
+
+### Pasos
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/CristianCRN/AGENTE_TRASLADOS.git
+cd AGENTE_TRASLADOS
+
+# 2. Crear entorno virtual
+python -m venv venv
+
+# 3. Activar entorno virtual
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/Mac
+
+# 4. Instalar dependencias
+pip install -r requirements.txt
+
+# 5. Configurar variables de entorno
+cp .env.example .env
+```
+
+### Configuración del `.env`
+
+```env
+TELEGRAM_TOKEN=tu_token_de_telegram
+OPENAI_API_KEY=tu_api_key_de_openai
+VALOR_TRASLADO=valor pactado
+```
+
+### Configurar la planilla
+
+Coloca tu planilla Excel en la raíz del proyecto con el nombre `Formato Planilla de Transporte.xlsx`. Debe tener el formato de tu empresa con los datos iniciando desde la fila 6.
+
+---
+
+## Uso
+
+```bash
+# 1. Inicializar la base de datos (solo la primera vez)
+python database/modelos.py
+
+# 2. Arrancar el bot
+python main.py
+```
+
+---
+
+## Autor
+
+**Cristian David López González**
+Ingeniero Electrónico | Especialista en IA
+
+[LinkedIn](https://www.linkedin.com/in/cristianlopez-7181a6239) · [GitHub](https://github.com/CristianCRN)
