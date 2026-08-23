@@ -1,22 +1,24 @@
-import sqlite3
-import pathlib
+import psycopg2
+import os
+from dotenv import load_dotenv
 
-DB_NAME = str(pathlib.Path(__file__).parent.parent / "Traslados.db")
-
+load_dotenv()
+DB_NAME = os.getenv("DB_URL")
 def inicializar():
     #Conexion a la base de datos con with para que guarde y cierre directamente 
-    with sqlite3.connect(DB_NAME) as conexion:
+    with psycopg2.connect(DB_NAME) as conexion:
         cursor = conexion.cursor()
         #Crear Tabla en caso de que no exista
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS Traslados (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                ID SERIAL PRIMARY KEY,
                 DIA TEXT,
                 MES TEXT, 
+                
                 ANO TEXT,
                 DESCRIPCION TEXT,
                 PROYECTO TEXT, 
-                VALOR REAL
+                VALOR NUMERIC
             )
         """)
         print("Base de datos y tabla listas")

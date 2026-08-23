@@ -1,6 +1,6 @@
 .vscode/
 .env
-Formato Planilla de Transporte.xlsx
 Traslados.db
 venv
 __pycache__/
+DB_URL
