@@ -2,6 +2,8 @@
 
 Sistema de registro inteligente de traslados por Telegram. Permite registrar movilizaciones de trabajo enviando un mensaje de texto natural al bot, y genera automáticamente la planilla mensual de transporte en Excel lista para entregar a la empresa.
 
+**Deployado en producción** — corre 24/7 en Render con base de datos persistente en Supabase PostgreSQL.
+
 ---
 
 ## Problema que resuelve
@@ -22,9 +24,10 @@ Después: mensaje al bot en el momento → fin de mes la planilla llega por Tele
 - **Registro por lenguaje natural** — escribe el traslado como lo dirías normalmente y GPT extrae origen, destino y proyecto automáticamente
 - **Fecha automática** — registra día, mes y año en el momento exacto del mensaje
 - **Valor fijo configurable** — el valor por traslado se configura en `.env` sin tocar el código
-- **Almacenamiento persistente** — base de datos SQLite que conserva los registros entre sesiones
+- **Almacenamiento persistente en la nube** — base de datos PostgreSQL en Supabase, los datos no se pierden aunque el servidor reinicie
 - **Generación de planilla mensual** — comando `/reporte MM AAAA` genera la planilla con el formato de la empresa
 - **Envío por Telegram** — la planilla llega directamente al celular
+- **Disponible 24/7** — deployado en Render, no requiere tener el computador encendido
 
 ---
 
@@ -37,14 +40,30 @@ bot/telegram_bot.py — detecta traslado y maneja el flujo
         ↓
 agente/extractor.py — GPT extrae descripción y proyecto
         ↓
-database/operaciones.py — guarda en SQLite con fecha automática
+database/operaciones.py — guarda en PostgreSQL (Supabase)
         ↓
 /reporte MM AAAA
         ↓
 reportes/generador_excel.py — genera planilla con formato empresa
         ↓
-Planilla por Telegram
+Planilla por Telegram ✅
 ```
+
+---
+
+## Stack tecnológico
+
+| Herramienta | Uso |
+|---|---|
+| Python 3.12 | Lenguaje principal |
+| OpenAI API (GPT-4o) | Interpretación de texto en lenguaje natural |
+| python-telegram-bot | Interfaz de mensajería |
+| PostgreSQL (Supabase) | Base de datos persistente en la nube |
+| psycopg2 | Conector Python → PostgreSQL |
+| openpyxl | Generación de la planilla Excel |
+| Flask | Servidor HTTP para compatibilidad con Render |
+| python-dotenv | Gestión de variables de entorno |
+| Render | Hosting 24/7 del bot |
 
 ---
 
@@ -56,13 +75,13 @@ AGENTE_TRASLADOS/
 ├── main.py                        ← punto de entrada
 │
 ├── bot/
-│   └── telegram_bot.py            ← recibe mensajes y detecta traslados
+│   └── Telegram_bot.py            ← recibe mensajes y detecta traslados
 │
 ├── agente/
 │   └── extractor.py               ← interpreta el texto con GPT
 │
 ├── database/
-│   ├── modelos.py                 ← crea la base de datos
+│   ├── modelos.py                 ← crea la tabla en PostgreSQL
 │   └── operaciones.py             ← guarda y consulta registros
 │
 ├── reportes/
@@ -83,8 +102,8 @@ AGENTE_TRASLADOS/
 Escribe el traslado de forma natural comenzando con la palabra **traslado**:
 
 ```
-traslado Punto A a Punto B, proyecto Casa Personal
-traslado Punto B a Punto C, proyecto Casa hermana
+traslado Punto A a Punto B, proyecto Personal
+traslado Punto B a Punto C, proyecto Primos 
 ```
 
 El bot confirma con:  Traslado Registrado
@@ -99,26 +118,14 @@ El bot responde con el archivo Excel listo para entregar.
 
 ---
 
-## Stack tecnológico
-
-| Herramienta | Uso |
-|---|---|
-| Python 3.12 | Lenguaje principal |
-| OpenAI API (GPT-4o) | Interpretación de texto en lenguaje natural |
-| python-telegram-bot | Interfaz de mensajería |
-| SQLite | Base de datos local persistente |
-| openpyxl | Generación de la planilla Excel |
-| python-dotenv | Gestión de variables de entorno |
-
----
-
-## Instalación
+## Instalación local
 
 ### Requisitos
 
 - Python 3.10+
 - Token de Telegram Bot (via [@BotFather](https://t.me/BotFather))
 - API Key de OpenAI
+- Base de datos PostgreSQL (Supabase recomendado)
 - Planilla Excel de traslados con el formato de tu empresa
 
 ### Pasos
@@ -147,24 +154,24 @@ cp .env.example .env
 ```env
 TELEGRAM_TOKEN=tu_token_de_telegram
 OPENAI_API_KEY=tu_api_key_de_openai
-VALOR_TRASLADO=valor pactado
+VALOR_TRASLADO=Valor pactado
+DB_URL=postgresql://postgres:password@db.xxxx.supabase.co:5432/postgres
 ```
 
 ### Configurar la planilla
 
-Coloca tu planilla Excel en la raíz del proyecto con el nombre `Formato Planilla de Transporte.xlsx`. Debe tener el formato de tu empresa con los datos iniciando desde la fila 6.
+Coloca tu planilla Excel en la raíz del proyecto con el nombre `Formato Planilla de Transporte.xlsx`.
 
 ---
 
-## Uso
+## Deployment en producción
 
-```bash
-# 1. Inicializar la base de datos (solo la primera vez)
-python database/modelos.py
+El bot está deployado en **Render** con base de datos en **Supabase**:
 
-# 2. Arrancar el bot
-python main.py
-```
+1. Crea un proyecto en Supabase y obtén la URL de conexión
+2. Crea un Web Service en Render conectado a este repositorio
+3. Agrega las variables de entorno en Render (incluyendo `DB_URL`)
+4. Start command: `python main.py`
 
 ---
 
