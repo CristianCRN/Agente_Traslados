@@ -11,7 +11,5 @@ def home():
 
 if __name__ == "__main__":
     inicializar()
-    # Corre Flask en un hilo separado
-    threading.Thread(target=lambda: app_flask.run(host='0.0.0.0', port=8080)).start()
-    # Corre el bot
-    main()
+    threading.Thread(target=main, daemon=True).start()
+    app_flask.run(host='0.0.0.0', port=8080)
