@@ -19,7 +19,8 @@ def traslados(text):
     }}
     Tener en cuenta que debes registrar en la descripcion el traslado completo, cada vez que el usuario escriba traslado, en descripcion agregas el recorrido,
     ejemplo: traslado Confa a Oficina, escirbes en descripcion Confa a Oficina, y el proyecto lo da el usuario tambien, el valor es un dato estandar, pero nunca lo agreges en la columna de proyecto.
-    Si el usuario no menciona el proyecto o no da un recorrido claro, deja ese campo como string vacío (""), NO inventes ni asumas un valor.
+    En el campo proyecto si el usuario no menciona el proyecto de manera clara, deja ese campo como un string vacio (""), NO inventes ni asumas valores.
+    En el campo descripcion si el usuario no menciona una ruta con inicio y destino de manera clara y obligatoria, deja ese campo como un string vacio (""), NO inventes ni asumas valores.
     Texto del usuario {text}
     """
     response = client.chat.completions.create(
@@ -40,6 +41,12 @@ def validacion_respuesta(datos):
     for campo in CAMPOS_PRINCIPALES:
         if campo not in respuesta:
             raise ValueError(f"JSON incompleto, falta campo principal: {campo}")
+       
+    if len(respuesta["descripcion"]) == 0:
+        raise ValueError("No hay recorrido")
+    
+    if len(respuesta["proyecto"]) == 0:
+        raise ValueError("No hay proyecto vinculado")
     
     return respuesta
 
