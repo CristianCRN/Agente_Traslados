@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-from agente.extractor import traslados
+from agente.extractor import traslados, validacion_respuesta
 from database.operaciones import guardar_traslado
 from reportes.generador_excel import generar_reporte
 import datetime
@@ -22,6 +22,7 @@ def main():
         try: 
             if texto.lower().startswith("traslado"):
                 datos = traslados(texto)
+                datos = validacion_respuesta(datos)
                 fecha=datetime.datetime.now()
                 guardar_traslado(str(fecha.day).zfill(2), str(fecha.month).zfill(2), str(fecha.year).zfill(2), datos["descripcion"], datos["proyecto"])
                 await update.message.reply_text("Traslado Registrado")
