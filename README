@@ -48,6 +48,38 @@ reportes/generador_excel.py — genera planilla con formato empresa
         ↓
 Planilla por Telegram ✅
 ```
+## Decisiones técnicas
+
+**Problema 1 — guardado silencioso en la base de datos**
+
+Al probar el agente, una pausa temporal de Supabase (por inactividad) hizo que varios traslados reales no se guardaran — pero el bot seguía respondiendo "Traslado Registrado" porque el error de conexión se atrapaba y solo se imprimía en el servidor, nunca llegaba al usuario.
+
+**Decisión:** `guardar_traslado` ahora relanza (`raise`) cualquier error de conexión como un `ValueError` explícito, y el bot responde con el error real en vez de confirmar un guardado que no ocurrió.
+
+**Trade-off:** el usuario puede ver un mensaje de error técnico si la base de datos no está disponible, en vez de una confirmación — menos pulido en ese caso puntual, pero honesto: nunca más un "registrado" falso.
+
+**Problema 2 — la IA inventaba datos cuando faltaba información**
+
+Cuando el usuario no mencionaba el proyecto, o escribía solo "traslado" sin contexto, GPT-4o completaba los campos con texto inventado en vez de dejarlos vacíos.
+
+**Decisión:** el prompt ahora instruye, en oraciones separadas por campo, dejar el valor vacío si no hay información real; y una validación rechaza cualquier traslado con campos vacíos antes de guardarlo.
+
+**Trade-off:** el bot exige mensajes más completos del usuario — rechaza traslados ambiguos en vez de adivinar — a cambio de cero datos inventados en la base de datos.
+
+---
+
+## Tests
+
+\`\`\`bash
+pytest -v
+\`\`\`
+
+4 tests sobre la lógica crítica de validación en `agente/extractor.py`:
+
+- Validación exitosa con descripción y proyecto completos
+- Falla cuando falta la llave `proyecto` en la respuesta
+- Falla cuando `descripcion` viene vacía (la IA no identificó un recorrido claro)
+- Falla cuando `proyecto` viene vacío (la IA no identificó el proyecto)
 
 ---
 

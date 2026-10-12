@@ -10,3 +10,20 @@ def test_validar_respuesta_sin_proyecto():
     datos = {"descripcion": "Oficina a Centro Comercial",}
     with pytest.raises(ValueError):
         validacion_respuesta(datos)
+    
+def test_validar_respuesta_sin_descripcion():
+    datos = {"proyecto": "Obra Minitas",}
+    with pytest.raises(ValueError):
+        validacion_respuesta(datos)
+        
+def test_validar_respuesta_con_descripcion_vacia():
+    datos = {"descripcion": "",
+        "proyecto": "Obra Minitas",}
+    with pytest.raises(ValueError):
+        validacion_respuesta(datos)
+        
+def test_validar_respuesta_con_proyecto_vacio():
+    datos = {"descripcion": "Oficina a Centro Comercial",
+        "proyecto": "",}
+    with pytest.raises(ValueError):
+        validacion_respuesta(datos)
