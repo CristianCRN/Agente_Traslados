@@ -15,7 +15,7 @@ def guardar_traslado(dia, mes, ano, descripcion, proyecto):
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (dia, mes, ano, descripcion, proyecto, valor))
     except Exception as e:
-        print (f"Error al guardar los gastos: {e}")               
+        raise ValueError (f"Error al guardar los gastos: {e}")        
 def obtener_traslado():
     with psycopg2.connect(DB_NAME) as conexion:
         cursor = conexion.cursor()

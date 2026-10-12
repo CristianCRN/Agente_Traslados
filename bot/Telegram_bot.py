@@ -19,14 +19,16 @@ def main():
 
     async def recibir_texto(update, context):
         texto = update.message.text
-        
-        if texto.lower().startswith("traslado"):
-            datos= traslados(texto)
-            fecha=datetime.datetime.now()
-            guardar_traslado(str(fecha.day).zfill(2), str(fecha.month).zfill(2), str(fecha.year).zfill(2), datos["descripcion"], datos["proyecto"])
-            await update.message.reply_text("Traslado Registrado")
-        else:
-            await update.message.reply_text("Por Favor Repite el traslado e inicia con la palabra Traslado")
+        try: 
+            if texto.lower().startswith("traslado"):
+                datos= traslados(texto)
+                fecha=datetime.datetime.now()
+                guardar_traslado(str(fecha.day).zfill(2), str(fecha.month).zfill(2), str(fecha.year).zfill(2), datos["descripcion"], datos["proyecto"])
+                await update.message.reply_text("Traslado Registrado")
+            else:
+                await update.message.reply_text("Por Favor Repite el traslado e inicia con la palabra Traslado")
+        except Exception as e:
+            await update.message.reply_text(f"Error: {str(e)}")
                     
     async def reporte(update, context):
         try:
