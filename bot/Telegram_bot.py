@@ -21,7 +21,7 @@ def main():
         texto = update.message.text
         try: 
             if texto.lower().startswith("traslado"):
-                datos= traslados(texto)
+                datos = traslados(texto)
                 fecha=datetime.datetime.now()
                 guardar_traslado(str(fecha.day).zfill(2), str(fecha.month).zfill(2), str(fecha.year).zfill(2), datos["descripcion"], datos["proyecto"])
                 await update.message.reply_text("Traslado Registrado")

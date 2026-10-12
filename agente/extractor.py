@@ -8,6 +8,7 @@ load_dotenv()
 # ── API ──
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
+CAMPOS_PRINCIPALES = {"descripcion", "proyecto"}
 
 def traslados(text):
     prompt = f"""
@@ -33,4 +34,11 @@ def traslados(text):
     #print ("Devolvio", respuesta)
     return  json.loads(respuesta)
 
+def validacion_respuesta(datos):
+    respuesta=datos
+    for campo in CAMPOS_PRINCIPALES:
+        if campo not in respuesta:
+            raise ValueError(f"JSON incompleto, falta campo principal: {campo}")
+    
+    return respuesta
 
