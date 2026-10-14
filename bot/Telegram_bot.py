@@ -14,7 +14,7 @@ def main():
 
     async def start(update, context):
         await update.message.reply_text(
-            "¡Hola! Soy Richard tu asistente personal. Cuéntame qué necesitas."
+            "¡Hola! Soy Richard tu asistente de traslados personal. Cuéntame a donde te diriges."
         )
 
     async def recibir_texto(update, context):
